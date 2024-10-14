@@ -78,7 +78,18 @@ extern XPowersLibInterface *PMU;
 #if defined(BOARD_HELTEC)
     extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
 #elif defined(BOARD_HELTEC_V3)
-    extern U8G2_SSD1306_128X64_NONAME_1_SW_I2C u8g2;
+// 20241014 dl9sec: Changed u8g2 driver to HW-I2C and full display frame buffer
+// Corresponds to https://github.com/icssw-org/MeshCom-Firmware/issues/51 
+// /-
+    //extern U8G2_SSD1306_128X64_NONAME_1_SW_I2C u8g2;
+		extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
+// -/
+// 20241014 dl9sec: Added explicit driver contructor for TBEAM, which has a SD1306, not a SH1106 OLED
+// Corresponds to https://github.com/icssw-org/MeshCom-Firmware/issues/52
+// /-
+#elif defined(BOARD_TBEAM)
+		extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
+// -/
 #elif defined(BOARD_RAK4630)
     extern U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2;
 #elif defined(BOARD_TLORA_OLV216)
@@ -496,6 +507,33 @@ void esp32setup()
         bSETGPS_POWER=true;
     #endif
 
+// 20241014 dl9sec: Moved "cvers" generation and u8g2.begin() before all other I2C access (u8g2 calls Wire.begin() and initializes the HW-I2C)
+// Corresponds to https://github.com/icssw-org/MeshCom-Firmware/issues/51
+// /-
+    char cvers[10];
+    sprintf(cvers, "%s/%-1.1s <%s>", SOURCE_VERSION, SOURCE_VERSION_SUB, getCountry(meshcom_settings.node_country).c_str());
+
+    #if not defined(BOARD_E290)
+
+    u8g2.begin();
+
+    u8g2.clearDisplay();
+    u8g2.setFont(u8g2_font_6x10_mf);
+    u8g2.firstPage();
+    do
+    {
+        u8g2.setFont(u8g2_font_10x20_mf);
+        u8g2.drawStr(5, 20, "MeshCom 4.0");
+        u8g2.setFont(u8g2_font_6x10_mf);
+        u8g2.drawStr(5, 30, cvers);
+        u8g2.drawStr(5, 40, "by icssw.org");
+        u8g2.drawStr(5, 50, "OE1KFR, OE1KBC");
+        u8g2.drawStr(5, 60, "...starting now");
+    } while (u8g2.nextPage());
+
+    #endif
+// -/
+
     #if defined(MODUL_FW_TBEAM)
         setupGPS(bSETGPS_POWER);
     #else
@@ -568,8 +606,12 @@ void esp32setup()
     radio.setRfSwitchPins(RXEN, TXEN);
 #endif
 
-    char cvers[10];
-    sprintf(cvers, "%s/%-1.1s <%s>", SOURCE_VERSION, SOURCE_VERSION_SUB, getCountry(meshcom_settings.node_country).c_str());
+// 20241014 dl9sec: Moved up
+// Corresponds to https://github.com/icssw-org/MeshCom-Firmware/issues/51
+// /-
+//    char cvers[10];
+//    sprintf(cvers, "%s/%-1.1s <%s>", SOURCE_VERSION, SOURCE_VERSION_SUB, getCountry(meshcom_settings.node_country).c_str());
+// -/
 
     #ifdef BOARD_E290
     
@@ -602,24 +644,27 @@ void esp32setup()
 
     e290_display.update();
 
-    #else
-
-    u8g2.begin();
-
-    u8g2.clearDisplay();
-    u8g2.setFont(u8g2_font_6x10_mf);
-    u8g2.firstPage();
-    do
-    {
-        u8g2.setFont(u8g2_font_10x20_mf);
-        u8g2.drawStr(5, 20, "MeshCom 4.0");
-        u8g2.setFont(u8g2_font_6x10_mf);
-        u8g2.drawStr(5, 30, cvers);
-        u8g2.drawStr(5, 40, "by icssw.org");
-        u8g2.drawStr(5, 50, "OE1KFR, OE1KBC");
-        u8g2.drawStr(5, 60, "...starting now");
-    } while (u8g2.nextPage());
-
+// 20241014 dl9sec: Moved up
+// Corresponds to https://github.com/icssw-org/MeshCom-Firmware/issues/51
+// /-
+//    #else
+//
+//    u8g2.begin();
+//
+//    u8g2.clearDisplay();
+//    u8g2.setFont(u8g2_font_6x10_mf);
+//    u8g2.firstPage();
+//    do
+//    {
+//        u8g2.setFont(u8g2_font_10x20_mf);
+//        u8g2.drawStr(5, 20, "MeshCom 4.0");
+//        u8g2.setFont(u8g2_font_6x10_mf);
+//        u8g2.drawStr(5, 30, cvers);
+//        u8g2.drawStr(5, 40, "by icssw.org");
+//        u8g2.drawStr(5, 50, "OE1KFR, OE1KBC");
+//        u8g2.drawStr(5, 60, "...starting now");
+//    } while (u8g2.nextPage());
+// -/
     #endif
 
     bool bRadio=false;

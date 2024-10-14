@@ -2060,9 +2060,13 @@ void commandAction(char *msg_text, bool ble)
     {
         String stri2c = "not available";
 
-        #if not defined(BOARD_HELTEC_V3)
+// 20241014 dl9sec: Removed #ifndef for Heltec V3, because HW-I2C works now and so "--showI2C" does
+// Corresponds to https://github.com/icssw-org/MeshCom-Firmware/issues/51 
+// /-
+//        #if not defined(BOARD_HELTEC_V3)
             stri2c = scanI2C();
-        #endif
+//        #endif
+// -/
 
         sprintf(print_buff, "%s", stri2c.c_str());
 

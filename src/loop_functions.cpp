@@ -113,13 +113,28 @@ int dzeile[6] = {10, 24, 34, 44, 54, 64};
 #if defined(BOARD_HELTEC)
     U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, 16, 15, 4);
 #elif defined(BOARD_HELTEC_V3)
-    U8G2_SSD1306_128X64_NONAME_1_SW_I2C u8g2(U8G2_R0, 18, 17, 21);
+// 20241014 dl9sec: Changed u8g2 driver to HW-I2C and full display frame buffer
+// Corresponds to https://github.com/icssw-org/MeshCom-Firmware/issues/51
+// /-
+    //U8G2_SSD1306_128X64_NONAME_1_SW_I2C u8g2(U8G2_R0, 18, 17, 21);
+		U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, 21, 18, 17);
+// -/
+// 20241014 dl9sec: Added explicit driver contructor for TBEAM, which has a SD1306, not a SH1106 OLED
+// Corresponds to https://github.com/icssw-org/MeshCom-Firmware/issues/52
+// /-
+#elif defined(BOARD_TBEAM)
+		U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE, 22, 21);
+// -/
 #elif defined(BOARD_RAK4630)
     U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0);  //RESET CLOCK DATA
 #elif defined(BOARD_TLORA_OLV216)
     U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, SCL, SDA, U8X8_PIN_NONE);
 #else
-    U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, SCL, SDA, U8X8_PIN_NONE);
+// 20241014 dl9sec: Corrected contructor (for HW-I2C: Reset, Clock, Data and NOT Clock, Data, Reset!)
+// /-	
+    //U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, SCL, SDA, U8X8_PIN_NONE);
+		U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE, SCL, SDA);
+// -/
 #endif
 
 #endif
@@ -696,15 +711,19 @@ void sendDisplayTime()
     #ifdef BOARD_E290
     #else
 
-        #ifdef BOARD_HELTEC_V3
-        u8g2.firstPage();
-        u8g2.drawStr(pageLine[0][0], pageLine[0][1], print_text);
-        u8g2.nextPage();
-        #else
+// 20241014 dl9sec: With full display frame buffer firstPage()/nextPage() can be omitted, treat like the other boards now
+// Corresponds to https://github.com/icssw-org/MeshCom-Firmware/issues/51
+// /-
+        //#ifdef BOARD_HELTEC_V3
+        //u8g2.firstPage();
+        //u8g2.drawStr(pageLine[0][0], pageLine[0][1], print_text);
+        //u8g2.nextPage();
+        //#else
         u8g2.setCursor(pageLine[0][0], pageLine[0][1]);
         u8g2.print(print_text);
         u8g2.sendBuffer();
-        #endif
+        //#endif
+// -/
     
     #endif
 

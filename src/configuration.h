@@ -8,7 +8,11 @@ definitions
 
 #define SOURCE_TYPE "C"
 #define SOURCE_VERSION "4.34"
-#define SOURCE_VERSION_SUB "c"
+// 20241014 dl9sec: Changed version to "z" to be sure it's the custom version
+// /-
+//#define SOURCE_VERSION_SUB "c"
+#define SOURCE_VERSION_SUB "z"
+// -/
 
 //Hardware Types
 #define TLORA_V2 1
@@ -397,9 +401,17 @@ static const uint8_t SCK   = 5;
 
 #define LED_PIN 25
 
+// 20241014 dl9sec: Changed I2C definition like at the other boards
+// Corresponds to https://github.com/icssw-org/MeshCom-Firmware/issues/51
+// /-
+#define RST_OLED   21
+#define SDA_PIN    17
+#define SCL_PIN    18
+
 #define RESET_OLED RST_OLED
-#define I2C_SDA 17 // I2C pins for this board
-#define I2C_SCL 18
+#define I2C_SDA    SDA_PIN
+#define I2C_SCL    SCL_PIN
+// -/
 
 #define VEXT_ENABLE Vext // active low, powers the oled display and the lora antenna boost
 #define BUTTON_PIN 0
@@ -425,8 +437,12 @@ static const uint8_t SCK   = 5;
 #define SX126X_BUSY LORA_DIO2
 #define SX126X_RST LORA_RESET
 
-#define SDA_PIN 17
-#define SCL_PIN 18
+// 20241014 dl9sec: Moved up
+// Corresponds to https://github.com/icssw-org/MeshCom-Firmware/issues/51
+// /-
+//#define SDA_PIN 17
+//#define SCL_PIN 18
+// -/
 
 #endif
 
